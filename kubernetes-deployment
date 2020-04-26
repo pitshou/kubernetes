@@ -1,25 +1,31 @@
 As root run the below commands:
 
 1. Disable SELinux for test environment:
+
  #setenforce 0
  #sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
 2. Enable the br_netfilter module for cluster communication:
+
  #modprobe br_netfilter
  #echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
 3. Disable swap to prevent memory allocation issues.
+
     #swapoff -a
     #vim /etc/fstab.orig  ->  Comment out the swap line
 
 4. Install the Docker prerequisites.
+
    #yum install -y yum-utils device-mapper-persistent-data lvm2
 
 5. Add the Docker repo and install Docker.
+
     #yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     #yum install -y docker-ce
 
 6. Configure the Docker Cgroup Driver to systemd, enable and start Docke
+
    #sed -i '/^ExecStart/ s/$/ --exec-opt native.cgroupdriver=systemd/' /usr/lib/systemd/system/docker.service 
    # systemctl daemon-reload
    # systemctl enable docker --now 
@@ -48,19 +54,35 @@ EOF
  #systemctl enable kubelet
 
 Only on the master
-10. Initialize the cluster using the IP range for Flannel.
 
- #kubeadm init --pod-network-cidr=10.244.0.0/16
+	10. Initialize the cluster using the IP range for Flannel.
 
-11. Deploy Flannel.
+ 	#kubeadm init --pod-network-cidr=10.244.0.0/16
 
- #kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+	11. Deploy Flannel.
 
-12. Check the cluster state.
+ 	#kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
- #kubectl get pods --all-namespaces
+	12. Check the cluster state.
+
+        #kubectl get nodes
+ 	#kubectl get pods --all-namespaces
 
 
 Only on the rest of the servers:
 
+	13. join command from the the installation output
 
+-----
+
+Basic stuff to start with:
+
+  1. Create a simple deployment:
+
+     #kubectl create deployment nginx --image=nginx
+  2. Inspect the pod:
+     #kubectl get pods
+  3. Scale the deployment:
+     #kubectl scale deployment nginx --replicas=4
+  4. Inspect the pods. We should have four now:
+     #kubectl get pods
